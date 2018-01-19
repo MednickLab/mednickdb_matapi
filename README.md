@@ -1,2 +1,3 @@
 # mednickdb_matparse
-Matlab API for the mednicklab
+Matlab API for the mednickdb
+[WIP]
