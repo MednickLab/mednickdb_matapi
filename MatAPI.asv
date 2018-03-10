@@ -75,27 +75,27 @@ classdef MatAPI
         end
         
         function ids = get_file_ids(obj, vargin)
-            url = [obj.server_address '/Files?' obj.append_specifiers(vargin)];
+            url = [obj.server_addres '/Files?' obj.append_specifiers(vargin)];
             ids = loadjson(webread(url));
         end
             
         function ids = get_deleted_file_ids(obj, vargin)
-            url = [obj.server_address '/DeletedFiles?' obj.append_specifiers(vargin)];
+            url = [obj.server_addres '/DeletedFiles?' obj.append_specifiers(vargin)];
             ids = loadjson(webread(url));
         end
         
         function ids = download_file(obj, id)
-            url = [obj.server_address '/DownloadFile?id=' num2str(id)];
+            url = [obj.server_addres '/DownloadFile?id=' num2str(id)];
             ids = loadjson(webread(url));
         end
             
         function file_info = get_file_info(obj, id)
-            url = [obj.server_address '/FileInfo?id=' num2str(id)];
+            url = [obj.server_addres '/FileInfo?id=' num2str(id)];
             file_info = loadjson(webread(url));   
         end
             
         function id = upload_file(obj, data, filename, fileformat, vargin)
-            url = [obj.server_address '/FileUpload?FileData=' 
+            url = [obj.server_addres '/FileUpload?FileData=' 
                 savejson('',data,filename)
                 '&FileName=' filename
                 '&FileFormat=' fileformat   
@@ -104,85 +104,33 @@ classdef MatAPI
         end
         
         function update_file_info(obj, id, fileinfo)
-            url = [obj.server_address '/FileUpload?FileData=' id
+            url = [obj.server_addres '/FileUpload?FileData=' id
                 '&FileInfo=' fileinfo];
             webread(url);   
         end
         
-        function upload_data(obj, data, fid, vargin)
-            %TODO. This will need to parse tabular and the like. Only works for structs for now
-            specifiers = ['studyid','versionid','subjectid','visitid','sessionid','filetype'];
-            specs_to_append = obj.append_specifiers(data, specifiers, vargin);
-            url = [obj.server_address '/DataUpload?FileData=' 
+        function id = upload_data(obj, data, fid, vargin)
+            specifiers = ['studyid','versionid','subjectid','visitid','sessionid','filetype']
+            specs_obj.append_specifiers(vargin,specifiers,vargin)
+            url = [obj.server_addres '/FileUpload?FileData=' 
                 savejson('',data,filename)
                 '&id=' fid
                 '&FileName=' filename
                 '&FileFormat=' fileformat   
-                specs_to_append];
-            webread(url);   
+                obj.append_specifiers(vargin)];
+            id = loadjson(webread(url));   
         end
             
-        function data = get_data(obj, vargin)
-            url = [obj.server_address '/Data?' obj.append_specifiers(vargin)];
-            data = loadjson(webread(url));
-        end
 
-
-        function data = get_deleted_data(obj, vargin)
-            url = [obj.server_address '/DeletedData?' obj.append_specifiers(vargin)];
-            data = loadjson(webread(url));
-        end
-
-
-        function get_data_associated_with_file(obj, id)
-            url = [obj.server_address '/FileData?id=' id];
-            data = loadjson(webread(url));
-        end
-
-
-        function filetypes = get_filetypes(obj, vargin)
-            url = [obj.server_address '/FileTypes?' obj.append_specifiers(vargin)];
-            filetypes = loadjson(webread(url));
-        end
-
-        function sessionids = get_sessionids(obj, vargin)
-            url = [obj.server_address '/Sessionids?' obj.append_specifiers(vargin)];
-            sessionids = loadjson(webread(url));
-        end
-
-        function studyids = get_studyids(obj, store)
-            url = [obj.server_address '/Studyids?' obj.append_specifiers(vargin)];
-            studyids = loadjson(webread(url));
-        end
         
-        function visitids = get_visitids(obj, store, vargin)
-            url = [obj.server_address '/Visitids?' obj.append_specifiers(vargin)];
-            visitids = loadjson(webread(url));
-        end
-        
-        function versionids = get_versionids(obj, store, vargin)
-            url = [obj.server_address '/Versionids?' obj.append_specifiers(vargin)];
-            versionids = loadjson(webread(url));
-        end
-            
-        function update_parsed_status(obj, id, status)
-            url = [obj.server_address '/UpdateParsedStatus?id=' id '&status=' status];
-            webread(url);
-        end
-
-        function fids = get_unparsed_files(obj)
-            url = [obj.server_address '/UnparsedFiles?'];
-            fids = loadjson(webread(url));
-        end
-
-        function fids = search_filestore(obj, query_string)
-            url = [obj.server_address '/QueryFile?query=' query_string];
-            fids = loadjson(webread(url));
-        end
-
-        function data = search_datastore(obj, query_string)
-            url = [obj.server_address '/QueryData?query=' query_string];
-            data = loadjson(webread(url));
+        function binary_data = download_file(obj, fileid, file_save_path)
+            url = [obj.server_address '/DownloadFile'];
+            url = [url '?id=' fileid];
+            binary_data = webread(url, 'ContentType','binary');
+            if exist('file_save_path','var') %FIXME
+                fid = fopen(file_save_path);
+                fwrite(fid,binary_data);
+            end
         end
         
     end
